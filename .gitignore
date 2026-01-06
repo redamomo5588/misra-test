@@ -1,1 +1,20 @@
+# Ignore analysis output
+output/
+
+# Ignore editor temporary files
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# Ignore build artifacts if any
+*.o
+*.obj
+*.exe
+*.out
+*.log
+
+# Ignore IDE folders
+.vscode/
+.idea/
 
