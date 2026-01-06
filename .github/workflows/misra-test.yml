@@ -1,58 +1,68 @@
-name: MISRA Analysis Test
+name: MISRA C 2012 Analysis (NaiveSystems Analyze)
 
 on:
   push:
-    branches:
-      - '**'       # triggers on any branch
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - '**'
+  workflow_dispatch:
 
 jobs:
-  analyze:
+  misra-analysis:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     steps:
-      # 1. Checkout your MISRA test repository
-      - name: Checkout test repo
-        uses: actions/checkout@v3
+      # ------------------------------------------------------------
+      # Checkout source code
+      # ------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # 2. Install Podman (container runtime)
+      # ------------------------------------------------------------
+      # Install Podman
+      # ------------------------------------------------------------
       - name: Install Podman
         run: |
           sudo apt-get update
-          sudo apt-get install -y podman git make
+          sudo apt-get install -y podman
 
-      # 3. Create output directory
-      - name: Create output folder
-        run: mkdir -p output
-
-      # 4. Clone NaiveSystems Analyze repo
-      - name: Clone NaiveSystems Analyze
+      # ------------------------------------------------------------
+      # Prepare required directories
+      # ------------------------------------------------------------
+      - name: Prepare analysis directories
         run: |
-          git clone https://github.com/naivesystems/analyze.git analyze-repo
-          ls analyze-repo  # list to verify
+          mkdir -p output
+          mkdir -p .naivesystems
 
-      # 5. Build the Analyze container locally from podman_image
-      - name: Build Analyze container
+      # ------------------------------------------------------------
+      # Pull the prebuilt NaiveSystems Analyze image
+      # ------------------------------------------------------------
+      - name: Pull NaiveSystems Analyze image
         run: |
-          make -C analyze-repo/podman_image build-en
+          podman pull ghcr.io/naivesystems/analyze:latest
 
-      # 6. Run NaiveSystems Analyze container
-      - name: Run NaiveSystems Analyze
+      # ------------------------------------------------------------
+      # Run MISRA analysis (vendor-accurate invocation)
+      # ------------------------------------------------------------
+      - name: Run MISRA C 2012 analysis
         run: |
           podman run --rm \
-            -v ${{ github.workspace }}/src:/workspace/src:z \
-            -v ${{ github.workspace }}/.naivesystems:/workspace/.naivesystems:z \
-            -v ${{ github.workspace }}/output:/workspace/output:z \
-            naive.systems/analyzer/misra:dev_en \
-            /workspace/src \
-            --rules=/workspace/.naivesystems/check_rules \
-            --output=/workspace/output
+            -v "${{ github.workspace }}:/src:O" \
+            -v "${{ github.workspace }}/.naivesystems:/config:Z" \
+            -v "${{ github.workspace }}/output:/output:Z" \
+            ghcr.io/naivesystems/analyze:latest \
+            /opt/naivesystems/misra_analyzer \
+              -src /src \
+              -config /config \
+              -output /output \
+              -format csv \
+              -show_results
 
-      # 7. Upload analysis artifacts
-      - name: Upload MISRA report artifacts
+      # ------------------------------------------------------------
+      # Upload analysis artifacts
+      # ------------------------------------------------------------
+      - name: Upload MISRA analysis artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: misra-analysis-report
+          name: misra-analysis-output
           path: output/
