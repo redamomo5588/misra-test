@@ -1,1 +1,46 @@
+name: MISRA Analysis Test
+
+on:
+  push:
+    branches:
+      - test-misra
+  pull_request:
+    branches:
+      - test-misra
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Install Podman (container runtime)
+      - name: Set up Podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+
+      # 3. Create output directory
+      - name: Create output folder
+        run: mkdir -p output
+
+      # 4. Run NaiveSystems Analyze in container
+      - name: Run NaiveSystems Analyze
+        run: |
+          podman run --rm \
+            -v ${{ github.workspace }}:/workspace:z \
+            naivesystems/analyze:latest \
+            /workspace/src \
+            --rules=/workspace/.naivesystems/check_rules \
+            --output=/workspace/output
+
+      # 5. Upload analysis artifacts
+      - name: Upload MISRA report artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: misra-analysis-report
+          path: output/
 
