@@ -4,10 +4,10 @@ name: MISRA Analysis Test
 on:
   push:
     branches:
-      - test-misra
+      - '**'
   pull_request:
     branches:
-      - test-misra
+      - '**'
 
 jobs:
   analyze:
