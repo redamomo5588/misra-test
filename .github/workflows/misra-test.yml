@@ -3,7 +3,7 @@ name: MISRA Analysis Test
 on:
   push:
     branches:
-      - '**'       # trigger on any branch
+      - '**'       # triggers on any branch
   pull_request:
     branches:
       - '**'
@@ -13,31 +13,44 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository
-      - name: Checkout repository
+      # 1. Checkout your MISRA test repository
+      - name: Checkout test repo
         uses: actions/checkout@v3
 
       # 2. Install Podman (container runtime)
-      - name: Set up Podman
+      - name: Install Podman
         run: |
           sudo apt-get update
-          sudo apt-get install -y podman
+          sudo apt-get install -y podman git make
 
       # 3. Create output directory
       - name: Create output folder
         run: mkdir -p output
 
-      # 4. Run NaiveSystems Analyze in container
+      # 4. Clone NaiveSystems Analyze repo
+      - name: Clone NaiveSystems Analyze
+        run: |
+          git clone https://github.com/naivesystems/analyze.git analyze-repo
+          ls analyze-repo  # list to verify
+
+      # 5. Build the Analyze container locally from podman_image
+      - name: Build Analyze container
+        run: |
+          make -C analyze-repo/podman_image build-en
+
+      # 6. Run NaiveSystems Analyze container
       - name: Run NaiveSystems Analyze
         run: |
           podman run --rm \
-            -v ${{ github.workspace }}:/workspace:z \
-            naivesystems/analyze:latest \
+            -v ${{ github.workspace }}/src:/workspace/src:z \
+            -v ${{ github.workspace }}/.naivesystems:/workspace/.naivesystems:z \
+            -v ${{ github.workspace }}/output:/workspace/output:z \
+            naive.systems/analyzer/misra:dev_en \
             /workspace/src \
             --rules=/workspace/.naivesystems/check_rules \
             --output=/workspace/output
 
-      # 5. Upload analysis artifacts (fixed to v4)
+      # 7. Upload analysis artifacts
       - name: Upload MISRA report artifacts
         uses: actions/upload-artifact@v4
         with:
