@@ -1,0 +1,279 @@
+{
+  "rules": [
+    {
+      "ident": "misra_c_2012/rule_10_1",
+      "subject": "[C0808][misra-c2012-10.1]: Violation of MISRA C:2012 Rule 10.1: Operands shall not be of an inappropriate essential type\nThe left operand of the & operator is of an inappropriate essential type category signed.\nThe right operand of the & operator is of an inappropriate essential type category signed.",
+      "severity": "high",
+      "violations": [
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "48| void bitwise_misuse(int val)\n49| {\n> 50|     int x = val & 0xFFFF;   /* possibly okay but triggers analyzer warning */\n51|     x = x | (~val);          /* misuse of bitwise NOT */\n52| }\n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "49| {\n50|     int x = val & 0xFFFF;   /* possibly okay but triggers analyzer warning */\n> 51|     x = x | (~val);          /* misuse of bitwise NOT */\n52| }\n53| \n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "49| {\n50|     int x = val & 0xFFFF;   /* possibly okay but triggers analyzer warning */\n> 51|     x = x | (~val);          /* misuse of bitwise NOT */\n52| }\n53| \n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "61| void complex_condition(int a, int b)\n62| {\n> 63|     if ((a > 0 && b < 0) || (a < 0 && b > 0) || !(a || b))\n64|     {\n65|         printf(\"Complex boolean expression\\n\"); /* analyzer may flag this as too complex */\n"
+        }
+      ]
+    },
+    {
+      "ident": "misra_c_2012/rule_10_3",
+      "subject": "[C0806][misra-c2012-10.3]: Violation of MISRA C:2012 Rule 10.3: The value of an expression shall not be assigned to an object with a narrower essential type or of a different essential type category",
+      "severity": "high",
+      "violations": [
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "40| void implicit_conversion(void)\n41| {\n> 42|     unsigned int u = -1;  /* Implicit signed to unsigned conversion */\n43|     signed char c = 256;  /* Out of range */\n44|     int sum = u + c;      /* Mixed signed/unsigned math */\n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "41| {\n42|     unsigned int u = -1;  /* Implicit signed to unsigned conversion */\n> 43|     signed char c = 256;  /* Out of range */\n44|     int sum = u + c;      /* Mixed signed/unsigned math */\n45| }\n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "55| void float_in_integer(void)\n56| {\n> 57|     int a = 3.14;   /* intentional implicit cast */\n58| }\n59| \n"
+        }
+      ]
+    },
+    {
+      "ident": "misra_c_2012/rule_10_4",
+      "subject": "[C0805][misra-c2012-10.4]: Violation of MISRA C:2012 Rule 10.4: Both operands of an operator in which the usual arithmetic conversions are performed shall have the same essential type category",
+      "severity": "medium",
+      "violations": [
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "42|     unsigned int u = -1;  /* Implicit signed to unsigned conversion */\n43|     signed char c = 256;  /* Out of range */\n> 44|     int sum = u + c;      /* Mixed signed/unsigned math */\n45| }\n46| \n"
+        }
+      ]
+    },
+    {
+      "ident": "misra_c_2012/rule_12_1",
+      "subject": "[C0605][misra-c2012-12.1]: Violation of MISRA C:2012 Rule 12.1: The precedence of operators within expressions should be made explicit",
+      "severity": "low",
+      "violations": [
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "61| void complex_condition(int a, int b)\n62| {\n> 63|     if ((a > 0 && b < 0) || (a < 0 && b > 0) || !(a || b))\n64|     {\n65|         printf(\"Complex boolean expression\\n\"); /* analyzer may flag this as too complex */\n"
+        }
+      ]
+    },
+    {
+      "ident": "misra_c_2012/rule_13_3",
+      "subject": "[C1604][misra-c2012-13.3]: Violation of MISRA C:2012 Rule 13.3: A full expression containing an increment (++) or decrement (--) operator should have no other potential side effects other than that caused by the increment or decrement operator",
+      "severity": "low",
+      "violations": [
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "21| \n22|     /* Rule 14.1, 14.2: complex expression with side effects */\n> 23|     ret_val = (input++ + (g_counter *= 2)) / 0; /* Division by zero to trigger potential false positive */\n24| \n25|     /* Rule 15.2: goto usage */\n"
+        }
+      ]
+    },
+    {
+      "ident": "misra_c_2012/rule_13_4",
+      "subject": "[C1603][misra-c2012-13.4]: Violation of MISRA C:2012 Rule 13.4: The result of an assignment operator should not be used",
+      "severity": "low",
+      "violations": [
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "21| \n22|     /* Rule 14.1, 14.2: complex expression with side effects */\n> 23|     ret_val = (input++ + (g_counter *= 2)) / 0; /* Division by zero to trigger potential false positive */\n24| \n25|     /* Rule 15.2: goto usage */\n"
+        }
+      ]
+    },
+    {
+      "ident": "misra_c_2012/rule_15_1",
+      "subject": "[C1807][misra-c2012-15.1]: Violation of MISRA C:2012 Rule 15.1: The goto statement should not be used",
+      "severity": "low",
+      "violations": [
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "26|     if (input > 10)\n27|     {\n> 28|         goto skip;\n29|     }\n30| \n"
+        }
+      ]
+    },
+    {
+      "ident": "misra_c_2012/rule_17_7",
+      "subject": "[C1502][misra-c2012-17.7]: Violation of MISRA C:2012 Rule 17.7: The value returned by a function having non-void return type shall be used",
+      "severity": "medium",
+      "violations": [
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "63|     if ((a > 0 && b < 0) || (a < 0 && b > 0) || !(a || b))\n64|     {\n> 65|         printf(\"Complex boolean expression\\n\"); /* analyzer may flag this as too complex */\n66|     }\n67| }\n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "72| int main(void)\n73| {\n> 74|     broken_function(5);\n75|     implicit_conversion();\n76|     bitwise_misuse(7);\n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "79| \n80|     /* Rule 20.x: use of standard library printf (sometimes flagged in safety contexts) */\n> 81|     printf(\"MISRA test done\\n\");\n82| \n83|     return 0;\n"
+        }
+      ]
+    },
+    {
+      "ident": "misra_c_2012/rule_17_8",
+      "subject": "[C1501][misra-c2012-17.8]: Violation of MISRA C:2012 Rule 17.8: A function parameter should not be modified",
+      "severity": "low",
+      "violations": [
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "21| \n22|     /* Rule 14.1, 14.2: complex expression with side effects */\n> 23|     ret_val = (input++ + (g_counter *= 2)) / 0; /* Division by zero to trigger potential false positive */\n24| \n25|     /* Rule 15.2: goto usage */\n"
+        }
+      ]
+    },
+    {
+      "ident": "misra_c_2012/rule_18_1",
+      "subject": "[C1308][misra-c2012-18.1]: Violation of MISRA C:2012 Rule 18.1: A pointer resulting from arithmetic on a pointer operand shall address an element of the same array as that pointer operand: Pointer arithmetic may result in the pointer addressing a different array",
+      "severity": "high",
+      "violations": [
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "30| \n31|     /* Rule 17.4, 17.6: pointer arithmetic on null pointer */\n> 32|     ptr += 1;\n33| \n34| skip:\n"
+        }
+      ]
+    },
+    {
+      "ident": "misra_c_2012/rule_18_4",
+      "subject": "[C1305][misra-c2012-18.4]: Violation of MISRA C:2012 Rule 18.4: The +, -, += and -= operators should not be applied to an expression of pointer type",
+      "severity": "low",
+      "violations": [
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "30| \n31|     /* Rule 17.4, 17.6: pointer arithmetic on null pointer */\n> 32|     ptr += 1;\n33| \n34| skip:\n"
+        }
+      ]
+    },
+    {
+      "ident": "misra_c_2012/rule_1_3",
+      "subject": "[C2203][misra-c2012-1.3]: Violation of MISRA C:2012 Rule 1.3: There shall be no occurrence of undefined or critical unspecified behaviour: Division by zero",
+      "severity": "high",
+      "violations": [
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "21| \n22|     /* Rule 14.1, 14.2: complex expression with side effects */\n> 23|     ret_val = (input++ + (g_counter *= 2)) / 0; /* Division by zero to trigger potential false positive */\n24| \n25|     /* Rule 15.2: goto usage */\n"
+        }
+      ]
+    },
+    {
+      "ident": "misra_c_2012/rule_21_6",
+      "subject": "[C0415][misra-c2012-21.6]: Violation of MISRA C:2012 Rule 21.6: The Standard Library input/output functions shall not be used",
+      "severity": "high",
+      "violations": [
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "5|  */\n6| \n> 7| #include <stdio.h>\n8| #include <stdlib.h>\n9| \n"
+        }
+      ]
+    },
+    {
+      "ident": "misra_c_2012/rule_2_2",
+      "subject": "[C2006][misra-c2012-2.2]: Violation of MISRA C:2012 Rule 2.2: There shall be no dead code: The value written to `&ret_val` (type `int`) is never used.",
+      "severity": "medium",
+      "violations": [
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "21| \n22|     /* Rule 14.1, 14.2: complex expression with side effects */\n> 23|     ret_val = (input++ + (g_counter *= 2)) / 0; /* Division by zero to trigger potential false positive */\n24| \n25|     /* Rule 15.2: goto usage */\n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "30| \n31|     /* Rule 17.4, 17.6: pointer arithmetic on null pointer */\n> 32|     ptr += 1;\n33| \n34| skip:\n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "42|     unsigned int u = -1;  /* Implicit signed to unsigned conversion */\n43|     signed char c = 256;  /* Out of range */\n> 44|     int sum = u + c;      /* Mixed signed/unsigned math */\n45| }\n46| \n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "49| {\n50|     int x = val & 0xFFFF;   /* possibly okay but triggers analyzer warning */\n> 51|     x = x | (~val);          /* misuse of bitwise NOT */\n52| }\n53| \n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "55| void float_in_integer(void)\n56| {\n> 57|     int a = 3.14;   /* intentional implicit cast */\n58| }\n59| \n"
+        }
+      ]
+    },
+    {
+      "ident": "misra_c_2012/rule_8_4",
+      "subject": "[C0511][misra-c2012-8.4]: Violation of MISRA C:2012 Rule 8.4: A compatible declaration shall be visible when an object or function with external linkage is defined (The function \"broken_function\" at /src/src/misra_maximal_test.c:16:5 is defined without visible declaration)",
+      "severity": "high",
+      "violations": [
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "14| \n15| /* Function with multiple violations */\n> 16| int broken_function(int input)\n17| {\n18|     int *ptr = NULL;               /* Rule 18.1, 18.2: NULL pointer usage */\n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "38| \n39| /* Violating Rule 13.3: implicit type conversion */\n> 40| void implicit_conversion(void)\n41| {\n42|     unsigned int u = -1;  /* Implicit signed to unsigned conversion */\n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "46| \n47| /* Violating Rule 11.x: bitwise misuse */\n> 48| void bitwise_misuse(int val)\n49| {\n50|     int x = val & 0xFFFF;   /* possibly okay but triggers analyzer warning */\n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "53| \n54| /* Violating Rule 12.1: floating point literals in integer context */\n> 55| void float_in_integer(void)\n56| {\n57|     int a = 3.14;   /* intentional implicit cast */\n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "59| \n60| /* Violating Rule 10.x: control flow */\n> 61| void complex_condition(int a, int b)\n62| {\n63|     if ((a > 0 && b < 0) || (a < 0 && b > 0) || !(a || b))\n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "68| \n69| /* Violating Rule 6.x: identifier naming */\n> 70| int weirdVarName123 = 0;\n71| \n72| int main(void)\n"
+        }
+      ]
+    },
+    {
+      "ident": "misra_c_2012/rule_8_7",
+      "subject": "[C0508][misra-c2012-8.7]: Violation of MISRA C:2012 Rule 8.7: Functions and objects should not be defined with external linkage if they are referenced in only one translation unit (\"g_counter\" referenced at /src/src/misra_maximal_test.c:13:5 is defined at /src/src/misra_maximal_test.c:13:5 with external linkage)",
+      "severity": "low",
+      "violations": [
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "11| \n12| /* Global variable (Rule 8.7, 8.8, 9.1, 9.2 violations) */\n> 13| int g_counter;  /* Non-const global, uninitialized */\n14| \n15| /* Function with multiple violations */\n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "68| \n69| /* Violating Rule 6.x: identifier naming */\n> 70| int weirdVarName123 = 0;\n71| \n72| int main(void)\n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "72| int main(void)\n73| {\n> 74|     broken_function(5);\n75|     implicit_conversion();\n76|     bitwise_misuse(7);\n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "73| {\n74|     broken_function(5);\n> 75|     implicit_conversion();\n76|     bitwise_misuse(7);\n77|     float_in_integer();\n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "74|     broken_function(5);\n75|     implicit_conversion();\n> 76|     bitwise_misuse(7);\n77|     float_in_integer();\n78|     complex_condition(1, -1);\n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "75|     implicit_conversion();\n76|     bitwise_misuse(7);\n> 77|     float_in_integer();\n78|     complex_condition(1, -1);\n79| \n"
+        },
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "76|     bitwise_misuse(7);\n77|     float_in_integer();\n> 78|     complex_condition(1, -1);\n79| \n80|     /* Rule 20.x: use of standard library printf (sometimes flagged in safety contexts) */\n"
+        }
+      ]
+    },
+    {
+      "ident": "misra_c_2012/rule_9_1",
+      "subject": "[C1205][misra-c2012-9.1]: Violation of MISRA C:2012 Rule 9.1: The value of an object with automatic storage duration shall not be read before it has been set: The result of the '/' expression is undefined",
+      "severity": "highest",
+      "violations": [
+        {
+          "path": "src/misra_maximal_test.c",
+          "code": "21| \n22|     /* Rule 14.1, 14.2: complex expression with side effects */\n> 23|     ret_val = (input++ + (g_counter *= 2)) / 0; /* Division by zero to trigger potential false positive */\n24| \n25|     /* Rule 15.2: goto usage */\n"
+        }
+      ]
+    }
+  ]
+}
