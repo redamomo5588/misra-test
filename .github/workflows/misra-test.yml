@@ -1,51 +1,40 @@
-name: Static Analysis
+name: MISRA Analysis
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
 
 jobs:
-  analysis:
+  analyze:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: write
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Podman
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y podman
+      - name: Set up Podman
+        uses: redhat-actions/podman-setup@v2
 
-    - name: Build Podman container
-      run: |
-        podman build -t static-analyzer .
+      - name: Run static analysis container
+        run: |
+          podman pull ghcr.io/naivesystems/analyze:2023.4.1.0@sha256:90a28f9e91c6b2f3f2386f00cdb9e3f981922f812d9dcd0c87b00690db5f0dc0
+          podman run --rm \
+            -v ${{ github.workspace }}:/workspace:Z \
+            ghcr.io/naivesystems/analyze:2023.4.1.0@sha256:90a28f9e91c6b2f3f2386f00cdb9e3f981922f812d9dcd0c87b00690db5f0dc0 \
+            bash -c "\
+              cd /workspace && \
+              bear -- make -j$(nproc) 2>&1 | tee bear.log && \
+              ./analyze --compile-commands compile_commands.json 2>&1 | tee analysis.log \
+            "
 
-    - name: Run static analysis in container
-      run: |
-        podman run --rm \
-          -v ${{ github.workspace }}:/workspace:Z \
-          static-analyzer \
-          bash -c "\
-            set -o pipefail; \
-            cd /workspace; \
-            echo 'Cleaning previous build...'; \
-            make clean || true; \
-            echo 'Running Bear to generate compilation database...'; \
-            bear -- make -j\$(nproc) 2>&1 | tee bear.log; \
-            echo 'Running static analysis...'; \
-            ./your_static_analysis_tool --compile-commands compile_commands.json 2>&1 | tee analysis.log \
-          "
+      - name: Upload BEAR logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: bear-log
+          path: bear.log
 
-    - name: Upload logs as artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: static-analysis-logs
-        path: |
-          bear.log
-          analysis.log
+      - name: Upload analysis logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-log
+          path: analysis.log
