@@ -1,10 +1,9 @@
 name: MISRA Analysis Test
 
-# Trigger workflow on push or pull request to the test-misra branch
 on:
   push:
     branches:
-      - '**'
+      - '**'       # trigger on any branch
   pull_request:
     branches:
       - '**'
@@ -38,9 +37,9 @@ jobs:
             --rules=/workspace/.naivesystems/check_rules \
             --output=/workspace/output
 
-      # 5. Upload analysis artifacts
+      # 5. Upload analysis artifacts (fixed to v4)
       - name: Upload MISRA report artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: misra-analysis-report
           path: output/
