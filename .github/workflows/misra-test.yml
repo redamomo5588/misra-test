@@ -1,5 +1,6 @@
 name: MISRA Analysis Test
 
+# Trigger workflow on push or pull request to the test-misra branch
 on:
   push:
     branches:
@@ -43,4 +44,3 @@ jobs:
         with:
           name: misra-analysis-report
           path: output/
-
