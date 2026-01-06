@@ -1,48 +1,51 @@
-name: MISRA C 2012 Analysis (NaiveSystems Analyze)
+name: Static Analysis
 
 on:
   push:
-    branches: [ "main" ]
-  workflow_dispatch:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  misra-analysis:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 90
+  analysis:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Install Podman
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y podman
+    - name: Set up Podman
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y podman
 
-      - name: Prepare directories
-        run: |
-          mkdir -p output
-          mkdir -p .naivesystems
+    - name: Build Podman container
+      run: |
+        podman build -t static-analyzer .
 
-      - name: Pull pinned NaiveSystems Analyze image
-        run: podman pull ghcr.io/naivesystems/analyze:2023.4.1.0
+    - name: Run static analysis in container
+      run: |
+        podman run --rm \
+          -v ${{ github.workspace }}:/workspace:Z \
+          static-analyzer \
+          bash -c "\
+            set -o pipefail; \
+            cd /workspace; \
+            echo 'Cleaning previous build...'; \
+            make clean || true; \
+            echo 'Running Bear to generate compilation database...'; \
+            bear -- make -j\$(nproc) 2>&1 | tee bear.log; \
+            echo 'Running static analysis...'; \
+            ./your_static_analysis_tool --compile-commands compile_commands.json 2>&1 | tee analysis.log \
+          "
 
-      - name: Run MISRA analysis
-        run: |
-          podman run --rm \
-            -v "${{ github.workspace }}:/src:O" \
-            -v "${{ github.workspace }}/.naivesystems:/config:Z" \
-            -v "${{ github.workspace }}/output:/output:Z" \
-            ghcr.io/naivesystems/analyze:2023.4.1.0 \
-            /opt/naivesystems/misra_analyzer \
-              -src_dir /src \
-              -results_dir /output \
-              -config_dir /config \
-              -show_results \
-              -timeout_normal 90
-
-      - name: Upload analysis artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: misra-analysis-output
-          path: output/
+    - name: Upload logs as artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: static-analysis-logs
+        path: |
+          bear.log
+          analysis.log
