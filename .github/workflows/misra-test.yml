@@ -3,7 +3,6 @@ name: MISRA C 2012 Analysis (NaiveSystems Analyze)
 on:
   push:
     branches: [ "main" ]
-  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -12,52 +11,37 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      # ------------------------------------------------------------
-      # 1️⃣ Checkout repository
-      # ------------------------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ------------------------------------------------------------
-      # 2️⃣ Install Podman (required for container execution)
-      # ------------------------------------------------------------
       - name: Install Podman
         run: |
           sudo apt-get update
           sudo apt-get install -y podman
 
-      # ------------------------------------------------------------
-      # 3️⃣ Prepare output directory
-      # ------------------------------------------------------------
-      - name: Create output directory
-        run: mkdir -p output
-
-      # ------------------------------------------------------------
-      # 4️⃣ Pull pinned NaiveSystems Analyze container
-      # ------------------------------------------------------------
-      - name: Pull NaiveSystems Analyze image (pinned)
+      - name: Prepare directories
         run: |
-          podman pull ghcr.io/naivesystems/analyze:2023.4.1.0
+          mkdir -p output
+          mkdir -p .naivesystems
 
-      # ------------------------------------------------------------
-      # 5️⃣ Run MISRA analysis (baseline, pinned image)
-      # ------------------------------------------------------------
-      - name: Run MISRA C 2012 analysis
+      - name: Pull pinned NaiveSystems Analyze image
+        run: podman pull ghcr.io/naivesystems/analyze:2023.4.1.0
+
+      - name: Run MISRA analysis
         run: |
           podman run --rm \
             -v "${{ github.workspace }}:/src:O" \
+            -v "${{ github.workspace }}/.naivesystems:/config:Z" \
             -v "${{ github.workspace }}/output:/output:Z" \
             ghcr.io/naivesystems/analyze:2023.4.1.0 \
             /opt/naivesystems/misra_analyzer \
-              -src /src \
-              -output /output \
+              -src_dir /src \
+              -results_dir /output \
+              -config_dir /config \
               -show_results \
               -timeout_normal 90
 
-      # ------------------------------------------------------------
-      # 6️⃣ Upload analysis results as workflow artifact
-      # ------------------------------------------------------------
-      - name: Upload MISRA analysis artifacts
+      - name: Upload analysis artifacts
         uses: actions/upload-artifact@v4
         with:
           name: misra-analysis-output
